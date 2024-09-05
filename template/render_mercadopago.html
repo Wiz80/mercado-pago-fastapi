@@ -1,0 +1,47 @@
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+<script>
+    const mp = new MercadoPago("TEST-229fef24-c2d2-42b4-a9c4-407689831379", {
+        locale: "es-CO",
+    });
+    document.getElementById('checkout-btn').addEventListener("click", async () => {
+        try {
+            const orderData = {
+                title: document.getElementById("title-product").innerText,
+                quantity: 1,
+                price: document.getElementById("price").innerText,
+            };
+
+            const response = await fetch("https://api.faceitcol.com/create_preference", {
+                method: 'POST',
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify(orderData),
+            });
+            const preference = await response.json();
+            createCheckoutButton(preference.id);
+        }
+        catch (error) {
+            alert(`error: ${error}`);
+        }
+    })
+
+    const createCheckoutButton = (preferenceId) => {
+        const bricksBuilder = mp.bricks();
+        const renderComponent = async () => {
+            if (window.checkoutButton) window.checkoutButton.unmount();
+            await bricksBuilder.create("wallet", "wallet_container", {
+                initialization: {
+                    preferenceId: preferenceId,
+                },
+                customization: {
+                    texts: {
+                        valueProp: 'smart_option',
+                    },
+                },
+            });
+
+        }
+        renderComponent();
+    }
+</script>
